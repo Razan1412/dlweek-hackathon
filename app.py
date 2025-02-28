@@ -3,7 +3,7 @@ import os
 from utils.model_utils import get_available_models, load_model, fetch_live_stock_data
 
 # ✅ Set Streamlit page title
-st.set_page_config(page_title="AI Trading Strategy", layout="wide")
+st.set_page_config(page_title="AI Trading Strategy - Domain Experts", layout="wide")
 
 # ✅ Sidebar: Model selection
 st.sidebar.header("Select Model")

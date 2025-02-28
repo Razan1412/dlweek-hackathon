@@ -1,7 +1,6 @@
 # Ignore Conda environment files
 .env
 *.json
-*.yml
 *.yaml
 
 # Ignore Python cache
