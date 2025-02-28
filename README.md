@@ -10,3 +10,7 @@ just setup your own environment (optional) and run
 if you install any libraries (pip install) update requirements.txt accordingly and push to github
 
 Requirements take some time to pip install, roughly 3ish minutes
+
+to run the app on localhost, from the root directory run
+
+`streamlit run app.py`
