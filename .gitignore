@@ -1,0 +1,17 @@
+# Ignore Conda environment files
+.env
+*.json
+*.yml
+*.yaml
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore model files
+*.h5
+model/
+
+# Ignore dataset files
+data/

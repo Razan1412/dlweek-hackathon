@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+yfinance
+numpy
+pandas
+scikit-learn
+ta
+requests
+transformers
+textblob
+tensorflow
