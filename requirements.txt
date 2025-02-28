@@ -1,11 +1,5 @@
-fastapi
-uvicorn
-yfinance
-numpy
-pandas
-scikit-learn
-ta
+streamlit
 requests
-transformers
-textblob
-tensorflow
+joblib
+python-dotenv
+numpy
