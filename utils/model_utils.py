@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 load_dotenv()
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 
-# ✅ Ensure models directory exists
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR = os.path.join(BASE_DIR, "models")
+# ✅ Fix: Ensure `models/` is correctly referenced
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the project root
+MODELS_DIR = os.path.join(BASE_DIR, "models")  # ✅ Now correctly points to `models/`
 
 def get_available_models():
     """List available models in the models directory."""
