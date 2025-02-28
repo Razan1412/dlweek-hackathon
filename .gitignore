@@ -9,9 +9,6 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Ignore model files
-*.h5
-model/
 
 # Ignore dataset files
 data/
