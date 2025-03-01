@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 import os
 from utils.model_utils import get_available_models, load_model, fetch_live_stock_data
+import yfinance as yf  # New import for yfinance
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="Financial & AI Trading Dashboard", layout="wide")
@@ -60,6 +61,11 @@ elif page == "AI Trading Strategy":
     available_models = get_available_models()
     selected_model = st.sidebar.selectbox("Choose a model:", available_models)
     ticker = st.sidebar.text_input("Enter Stock Ticker (e.g., AAPL):", "AAPL")
+
+    # New addition: Fetch 60 days worth of historical stock prices using yfinance
+    stock_data = yf.Ticker(ticker)
+    hist_data = stock_data.history(period="60d")
+    st.write("### 60 Day Historical Stock Prices", hist_data)
 
     # Load the selected model (if available)
     model = load_model(selected_model) if selected_model else None
