@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import yfinance as yf
 import os
 from utils.model_utils import get_available_models, load_model, fetch_live_stock_data
 
@@ -52,6 +53,61 @@ if page == "Financial Dashboard":
     df_indicators = pd.DataFrame(data)
     st.table(df_indicators)
 
+    # ---- New Section: Open-Close Price Visualization ---- #
+    st.header("📊 Tech Stock Open-Close Prices (Today)")
+
+    # Predefined tech stock tickers
+    tech_stocks = ["AAPL", "AMD", "NVDA", "TSM", "GOOG", "MSFT", "AMZN", "META", "TSLA", "QCOM"]
+
+    # Multi-select for choosing stocks
+    selected_tickers = st.multiselect("Select tech stocks:", tech_stocks, default=["AAPL", "NVDA", "TSLA"])
+
+    # Fetch and display stock open-close prices
+    if selected_tickers:
+        open_prices = []
+        close_prices = []
+        tickers_displayed = []
+
+        for ticker in selected_tickers:
+            stock_data = yf.Ticker(ticker).history(period="1d")
+            if not stock_data.empty:
+                open_prices.append(stock_data['Open'].iloc[0])
+                close_prices.append(stock_data['Close'].iloc[0])
+                tickers_displayed.append(ticker)
+
+        # Create bar chart using Plotly
+        if tickers_displayed:
+            fig_open_close = go.Figure()
+
+            # Open Price bars
+            fig_open_close.add_trace(go.Bar(
+                x=tickers_displayed,
+                y=open_prices,
+                name="Open Price",
+                marker_color="royalblue"
+            ))
+
+            # Close Price bars
+            fig_open_close.add_trace(go.Bar(
+                x=tickers_displayed,
+                y=close_prices,
+                name="Close Price",
+                marker_color="tomato"
+            ))
+
+            # Layout settings for theme consistency
+            fig_open_close.update_layout(
+                title="Open vs Close Prices (Today)",
+                xaxis_title="Stock Ticker",
+                yaxis_title="Price (USD)",
+                barmode="group",  # Grouped bars
+                template="plotly_dark",
+                font=dict(size=14)
+            )
+
+            # Display the bar chart
+            st.plotly_chart(fig_open_close, use_container_width=True)
+
 elif page == "AI Trading Strategy":
     st.title("📈 AI Trading Strategy")
 
@@ -60,6 +116,11 @@ elif page == "AI Trading Strategy":
     available_models = get_available_models()
     selected_model = st.sidebar.selectbox("Choose a model:", available_models)
     ticker = st.sidebar.text_input("Enter Stock Ticker (e.g., AAPL):", "AAPL")
+
+    # Fetch 60 days worth of historical stock prices using yfinance
+    stock_data = yf.Ticker(ticker)
+    hist_data = stock_data.history(period="60d")
+    st.write("### 60 Day Historical Stock Prices", hist_data)
 
     # Load the selected model (if available)
     model = load_model(selected_model) if selected_model else None
