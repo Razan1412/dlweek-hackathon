@@ -37,12 +37,7 @@ if page == "Financial Dashboard":
     fig_price.update_layout(title="Predicted vs Actual Closing Price", xaxis_title="Date", yaxis_title="Price")
     st.plotly_chart(fig_price, use_container_width=True)
 
-    # Supply Chain Analysis
-    st.header("Supply Chain Analysis")
-    fig_supply = go.Figure()
-    fig_supply.add_trace(go.Bar(x=dates, y=supply_chain_score, name='Supply Chain Score'))
-    fig_supply.update_layout(title="Supply Chain Health Indicator", xaxis_title="Date", yaxis_title="Score")
-    st.plotly_chart(fig_supply, use_container_width=True)
+
 
     # Additional Financial Indicators (displayed as a table)
     st.header("Additional Financial Indicators")
