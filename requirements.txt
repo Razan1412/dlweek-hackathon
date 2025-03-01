@@ -4,5 +4,4 @@ joblib
 python-dotenv
 numpy
 pandas
-os
 plotly
