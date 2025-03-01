@@ -99,7 +99,7 @@ if page == "Financial Dashboard":
             # Display the bar chart
             st.plotly_chart(fig_open_close, use_container_width=True)
 
-elif page == "AI Trading Strategy":
+if page == "AI Trading Strategy":
     st.title("📈 AI Trading Strategy")
 
     # Sidebar for AI Trading Strategy options
