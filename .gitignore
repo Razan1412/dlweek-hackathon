@@ -2,6 +2,7 @@
 .env
 *.json
 *.yaml
+myenv
 
 # Ignore Python cache
 __pycache__/
