@@ -117,11 +117,6 @@ elif page == "AI Trading Strategy":
     selected_model = st.sidebar.selectbox("Choose a model:", available_models)
     ticker = st.sidebar.text_input("Enter Stock Ticker (e.g., AAPL):", "AAPL")
 
-    # Fetch 60 days worth of historical stock prices using yfinance
-    stock_data = yf.Ticker(ticker)
-    hist_data = stock_data.history(period="60d")
-    st.write("### 60 Day Historical Stock Prices", hist_data)
-
     # Load the selected model (if available)
     model = load_model(selected_model) if selected_model else None
 
