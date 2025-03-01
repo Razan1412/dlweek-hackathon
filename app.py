@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import yfinance as yf
 import os
 from utils.model_utils import get_available_models, load_model, fetch_live_stock_data
+from stock_lstm import StockLSTM
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="Financial & AI Trading Dashboard", layout="wide")
