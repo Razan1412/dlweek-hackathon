@@ -28,20 +28,6 @@ if page == "Financial Dashboard":
     actual = np.linspace(100, 109, 30) + np.random.normal(0, 1, 30)
     supply_chain_score = np.random.uniform(low=0, high=100, size=30)
 
-    # Market Sentiment Analysis
-    st.header("Market Sentiment Analysis")
-    fig_sentiment = go.Figure()
-    fig_sentiment.add_trace(go.Scatter(x=dates, y=sentiment, mode='lines+markers', name='Sentiment Score'))
-    fig_sentiment.update_layout(title="Daily Market Sentiment", xaxis_title="Date", yaxis_title="Sentiment Score")
-    st.plotly_chart(fig_sentiment, use_container_width=True)
-
-    # Predicted vs Actual Closing Price
-    st.header("Predicted vs Actual Closing Price")
-    fig_price = go.Figure()
-    fig_price.add_trace(go.Scatter(x=dates, y=predicted, mode='lines', name='Predicted'))
-    fig_price.add_trace(go.Scatter(x=dates, y=actual, mode='lines', name='Actual'))
-    fig_price.update_layout(title="Predicted vs Actual Closing Price", xaxis_title="Date", yaxis_title="Price")
-    st.plotly_chart(fig_price, use_container_width=True)
 
     
     # ---- New Section: Open-Close Price Visualization ---- #
@@ -141,82 +127,82 @@ if page == "AI Trading Strategy":
                     "Metric": ["Current Price", "SMA-50", "SMA-200", "RSI"],
                     "Value": [f"${live_data[0]:.2f}", f"${live_data[1]:.2f}", f"${live_data[2]:.2f}", f"{live_data[3]:.2f}"]
                 })
-# ---- New Section: Additional Financial Indicators ---- #
-st.header("📊 Additional Financial Indicators")
-
-# Function to compute financial indicators
-def compute_technical_indicators(stock_data):
-    """Compute technical indicators from stock data."""
-    stock_data = stock_data.copy()
+    # ---- New Section: Additional Financial Indicators ---- #
+    st.header("📊 Additional Financial Indicators")
     
-    # Compute Moving Averages
-    stock_data["10-day MA"] = stock_data["Close"].rolling(window=10).mean()
-    stock_data["50-day MA"] = stock_data["Close"].rolling(window=50).mean()
-
-    # Compute Volatility (10-day standard deviation of % change)
-    stock_data["Volatility"] = stock_data["Close"].pct_change().rolling(window=10).std()
-
-    # Compute Momentum (Price difference over 10 days)
-    stock_data["Momentum"] = stock_data["Close"] - stock_data["Close"].shift(10)
-
-    # Compute RSI
-    delta = stock_data["Close"].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-    rs = gain / loss
-    stock_data["RSI"] = 100 - (100 / (1 + rs))
-
-    # Compute Trading Volume (use last available volume)
-    stock_data["Trading Volume"] = stock_data["Volume"]
-
-    # Drop NaN values from rolling calculations
-    stock_data.dropna(inplace=True)
-
-    return stock_data
-
-# Predefined tech stock tickers
-tech_stocks = ["AAPL", "AMD", "NVDA", "TSM", "GOOG", "MSFT", "AMZN", "META", "TSLA", "QCOM"]
-
-# ✅ FIX: Add a unique key to prevent duplicate ID errors
-selected_tickers = st.multiselect("Select tech stocks:", tech_stocks, default=["AAPL", "NVDA", "TSLA"], key="multiselect_tickers")
-
-# Fetch and display financial indicators
-if selected_tickers:
-    for ticker in selected_tickers:
-        stock_data = yf.download(ticker, period="6mo")
-
-        # Check if stock data is available
-        if stock_data.empty:
-            st.warning(f"No data available for {ticker}. Skipping...")
-            continue  
-
-        # Compute technical indicators
-        stock_data = compute_technical_indicators(stock_data)
-
-        # Extract latest values for each indicator
-        latest_rsi = stock_data["RSI"].iloc[-1]
-        latest_50_ma = stock_data["50-day MA"].iloc[-1]
-        latest_10_ma = stock_data["10-day MA"].iloc[-1]
-        latest_momentum = stock_data["Momentum"].iloc[-1]
-        latest_volatility = stock_data["Volatility"].iloc[-1]
-        latest_volume = stock_data["Trading Volume"].dropna().iloc[-1] if not stock_data["Trading Volume"].isna().all() else "N/A"
-
-        # Create a DataFrame to display the indicators in a table
-        df_indicators = pd.DataFrame({
-            "Indicator": ["RSI", "50-day Moving Average", "10-day Moving Average", "Momentum", "Volatility", "Volume"],
-            "Value": [
-                f"{latest_rsi:.2f}",
-                f"{latest_50_ma:.2f}",
-                f"{latest_10_ma:.2f}",
-                f"{latest_momentum:.2f}",
-                f"{latest_volatility:.4f}",
-                f"{int(latest_volume):,}" if latest_volume != "N/A" else "N/A"
-            ]
-        })
-
-        # Display the table for each stock
-        st.subheader(f"{ticker} - Key Indicators")
-        st.table(df_indicators)
+    # Function to compute financial indicators
+    def compute_technical_indicators(stock_data):
+        """Compute technical indicators from stock data."""
+        stock_data = stock_data.copy()
+        
+        # Compute Moving Averages
+        stock_data["10-day MA"] = stock_data["Close"].rolling(window=10).mean()
+        stock_data["50-day MA"] = stock_data["Close"].rolling(window=50).mean()
+    
+        # Compute Volatility (10-day standard deviation of % change)
+        stock_data["Volatility"] = stock_data["Close"].pct_change().rolling(window=10).std()
+    
+        # Compute Momentum (Price difference over 10 days)
+        stock_data["Momentum"] = stock_data["Close"] - stock_data["Close"].shift(10)
+    
+        # Compute RSI
+        delta = stock_data["Close"].diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+        rs = gain / loss
+        stock_data["RSI"] = 100 - (100 / (1 + rs))
+    
+        # Compute Trading Volume (use last available volume)
+        stock_data["Trading Volume"] = stock_data["Volume"]
+    
+        # Drop NaN values from rolling calculations
+        stock_data.dropna(inplace=True)
+    
+        return stock_data
+    
+    # Predefined tech stock tickers
+    tech_stocks = ["AAPL", "AMD", "NVDA", "TSM", "GOOG", "MSFT", "AMZN", "META", "TSLA", "QCOM"]
+    
+    # ✅ FIX: Add a unique key to prevent duplicate ID errors
+    selected_tickers = st.multiselect("Select tech stocks:", tech_stocks, default=["AAPL", "NVDA", "TSLA"], key="multiselect_tickers")
+    
+    # Fetch and display financial indicators
+    if selected_tickers:
+        for ticker in selected_tickers:
+            stock_data = yf.download(ticker, period="6mo")
+    
+            # Check if stock data is available
+            if stock_data.empty:
+                st.warning(f"No data available for {ticker}. Skipping...")
+                continue  
+    
+            # Compute technical indicators
+            stock_data = compute_technical_indicators(stock_data)
+    
+            # Extract latest values for each indicator
+            latest_rsi = stock_data["RSI"].iloc[-1]
+            latest_50_ma = stock_data["50-day MA"].iloc[-1]
+            latest_10_ma = stock_data["10-day MA"].iloc[-1]
+            latest_momentum = stock_data["Momentum"].iloc[-1]
+            latest_volatility = stock_data["Volatility"].iloc[-1]
+            latest_volume = stock_data["Trading Volume"].dropna().iloc[-1] if not stock_data["Trading Volume"].isna().all() else "N/A"
+    
+            # Create a DataFrame to display the indicators in a table
+            df_indicators = pd.DataFrame({
+                "Indicator": ["RSI", "50-day Moving Average", "10-day Moving Average", "Momentum", "Volatility", "Volume"],
+                "Value": [
+                    f"{latest_rsi:.2f}",
+                    f"{latest_50_ma:.2f}",
+                    f"{latest_10_ma:.2f}",
+                    f"{latest_momentum:.2f}",
+                    f"{latest_volatility:.4f}",
+                    f"{int(latest_volume):,}" if latest_volume != "N/A" else "N/A"
+                ]
+            })
+    
+            # Display the table for each stock
+            st.subheader(f"{ticker} - Key Indicators")
+            st.table(df_indicators)
 elif page == "Stock LSTM Model - Actual vs Predicted":
             
     # ----------------- STOCK OPTIONS -----------------
