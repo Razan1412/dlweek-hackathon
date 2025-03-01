@@ -43,15 +43,7 @@ if page == "Financial Dashboard":
     fig_price.update_layout(title="Predicted vs Actual Closing Price", xaxis_title="Date", yaxis_title="Price")
     st.plotly_chart(fig_price, use_container_width=True)
 
-    # Additional Financial Indicators (displayed as a table)
-    st.header("Additional Financial Indicators")
-    data = {
-        "Indicator": ["RSI", "50-day Moving Average", "Bollinger Bands", "Volume"],
-        "Value": ["45", "102.5", "Upper: 110, Lower: 95", "1.2M"]
-    }
-    df_indicators = pd.DataFrame(data)
-    st.table(df_indicators)
-
+    
     # ---- New Section: Open-Close Price Visualization ---- #
     st.header("📊 Tech Stock Open-Close Prices (Today)")
 
