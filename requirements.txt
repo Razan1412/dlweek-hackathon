@@ -3,3 +3,5 @@ requests
 joblib
 python-dotenv
 numpy
+pandas
+plotly
