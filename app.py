@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import os
 from utils.model_utils import get_available_models, load_model, fetch_live_stock_data
 import yfinance as yf  # New import for yfinance
+from stock_lstm import StockLSTM
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="Financial & AI Trading Dashboard", layout="wide")
@@ -29,13 +30,81 @@ if page == "Financial Dashboard":
     fig_sentiment.update_layout(title="Daily Market Sentiment", xaxis_title="Date", yaxis_title="Sentiment Score")
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # Predicted vs Actual Closing Price
-    st.header("Predicted vs Actual Closing Price")
-    fig_price = go.Figure()
-    fig_price.add_trace(go.Scatter(x=dates, y=predicted, mode='lines', name='Predicted'))
-    fig_price.add_trace(go.Scatter(x=dates, y=actual, mode='lines', name='Actual'))
-    fig_price.update_layout(title="Predicted vs Actual Closing Price", xaxis_title="Date", yaxis_title="Price")
-    st.plotly_chart(fig_price, use_container_width=True)
+# Import the StockLSTM class from your local file
+from stock_lstm import StockLSTM
+
+# Set the page configuration (optional)
+st.set_page_config(page_title="Stock LSTM Forecaster", layout="wide")
+
+st.title("📈 Stock LSTM Forecaster")
+
+# 1. User inputs a ticker symbol
+ticker = st.text_input("Enter a stock ticker (e.g. AAPL):", "AAPL")
+
+# 2. Button to fetch data, train the model, and forecast the next 30 days
+if st.button("Train & Forecast Next 30 Days"):
+    # Fetch 60 days of historical data from yfinance
+    stock = yf.Ticker(ticker)
+    hist_data = stock.history(period="60d")  # last 60 days
+
+    # Check if we have enough data
+    if hist_data.empty or len(hist_data) < 60:
+        st.error("Not enough data to train the model (need at least 60 days).")
+    else:
+        st.write("### Last 60 Days of Historical Data", hist_data)
+
+        # Extract closing prices as a pandas Series
+        close_data = hist_data['Close']
+
+        # 3. Initialize the LSTM model with sequence_length=60
+        lstm_model = StockLSTM(data=close_data, sequence_length=60)
+
+        # 4. Train the model (adjust epochs/batch_size as needed)
+        lstm_model.train_model(epochs=10, batch_size=32)
+
+        # 5. Forecast the next 30 days
+        future_days = 30
+        future_dates, future_preds = lstm_model.forecast_future(future_days=future_days)
+
+        # 6. Display forecast results in a table
+        forecast_df = pd.DataFrame({
+            "Date": future_dates,
+            "Predicted Price": future_preds.flatten()
+        })
+        forecast_df.set_index("Date", inplace=True)
+        st.write(f"## Next {future_days} Days Forecast")
+        st.table(forecast_df)
+
+        # 7. Plot the actual recent prices vs. forecast
+        fig = go.Figure()
+
+        # Plot the last 30 days of actual data for context
+        last_30_data = close_data[-30:]
+        fig.add_trace(
+            go.Scatter(
+                x=last_30_data.index,
+                y=last_30_data.values,
+                mode='lines',
+                name='Actual (Last 30 Days)'
+            )
+        )
+
+        # Plot the forecast
+        fig.add_trace(
+            go.Scatter(
+                x=future_dates,
+                y=future_preds.flatten(),
+                mode='lines',
+                name=f'Forecast (Next {future_days} Days)'
+            )
+        )
+
+        fig.update_layout(
+            title=f"{ticker} Price Forecast",
+            xaxis_title="Date",
+            yaxis_title="Price (USD)"
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
     # Supply Chain Analysis
     st.header("Supply Chain Analysis")
