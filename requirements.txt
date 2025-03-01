@@ -7,3 +7,5 @@ pandas
 plotly
 yfinance
 telethon
+tensorflow
+scikit-learn
