@@ -9,3 +9,4 @@ yfinance
 telethon
 tensorflow
 scikit-learn
+matplotlib
