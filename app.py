@@ -16,7 +16,7 @@ from utils.model_utils import get_available_models, load_model
 st.set_page_config(page_title="Financial & AI Trading Dashboard", layout="wide")
 
 # Sidebar: Navigation
-page = st.sidebar.selectbox("Select Page", ["Financial Dashboard", "AI Trading Strategy", "Stock LSTM Model - Actual vs Predicted"])
+page = st.sidebar.selectbox("Select Page", ["Financial Dashboard", "Price Predictor Model", "Stock LSTM Model - Actual vs Predicted Visualizations"])
 
 if page == "Financial Dashboard":
     st.title("Comprehensive Financial Dashboard")
@@ -85,11 +85,11 @@ if page == "Financial Dashboard":
             # Display the bar chart
             st.plotly_chart(fig_open_close, use_container_width=True)
 
-if page == "AI Trading Strategy":
-    st.title("📈 AI Trading Strategy")
+if page == "Price Predictor Model":
+    st.title("📈 Fine Tuned LSTMs")
 
     # Sidebar for AI Trading Strategy options
-    st.sidebar.header("Trading Strategy Options")
+    st.sidebar.header("Indicate Model and Ticker")
     available_models = get_available_models()
     selected_model = st.sidebar.selectbox("Choose a model:", available_models)
     ticker = st.sidebar.text_input("Enter Stock Ticker (e.g., AAPL):", "AAPL")
@@ -101,81 +101,99 @@ if page == "AI Trading Strategy":
 
     # Load the selected model (if available)
     model = load_model(selected_model) if selected_model else None
+      # --- FIT THE SCALER HERE AFTER LOADING THE MODEL ---
+    if model: # Only fit scaler if model loaded successfully
+        print("Debug - Fitting scaler to hist_data['Close']...")
+        try:
+            model.scaler.fit(hist_data['Close'].values.reshape(-1, 1)) # Fit scaler to historical close prices
+            print("Debug - Scaler fitted successfully.")
+        except Exception as e:
+            st.error(f"⚠️ Error fitting scaler: {e}")
+            model = None # Disable model if scaler fitting fails
+            print(f"Debug - Error fitting scaler: {e}")
 
     # Predict button
     if st.sidebar.button("Predict"):
         if not model:
             st.error("⚠️ No model loaded. Please check the model selection.")
         else:
-            live_data = hist_data.copy()
-            # Perform prediction using the loaded model
-            prediction = model.predict([live_data])
-            predicted_price, action = prediction[0]
+            # live_data = hist_data.copy() # No need for copy anymore
+            print("Debug - Type of hist_data:", type(hist_data))
+            print("Debug - Content of hist_data:", hist_data.head())
+
+            # --- Prepare input for predict_single_day correctly ---
+            past_60_days_close = hist_data['Close'].tail(60) # Get last 60 'Close' prices as Series
+            print("Debug - Type of past_60_days_close:", type(past_60_days_close))
+            print("Debug - Content of past_60_days_close:", past_60_days_close.head())
+
+            # Perform prediction using the loaded model (StockLSTM instance)
+            predicted_date_str, predicted_price_val = model.predict_single_day(past_60_days_close) # Call predict_single_day
+            print("Debug - Prediction Output (predict_single_day):", (predicted_date_str, predicted_price_val))
+
+            # --- Extract predicted_price (it's already a float from predict_single_day) ---
+            predicted_price = predicted_price_val # predicted_price_val is already the float value
+
 
             # Display prediction results
             st.subheader(f"Stock: {ticker}")
-            st.metric(label="Current Price", value=f"${live_data[0]:.2f}")
-            st.metric(label="Predicted Price", value=f"${predicted_price:.2f}")
-            st.success(f"**Recommendation: {action}**")
+            current_price = hist_data['Close'].iloc[-1]
+            st.metric(label="Current Price Right Now", value=f"${current_price:.2f}")
+            st.metric(label="Predicted Price at Close Today", value=f"${predicted_price:.2f}") # Should now be a float, no TypeError
 
-            # Display additional stock data in a table
-            st.write("### Stock Data")
-            st.table({
-                "Metric": ["Current Price", "SMA-50", "SMA-200", "RSI"],
-                "Value": [f"${live_data[0]:.2f}", f"${live_data[1]:.2f}", f"${live_data[2]:.2f}", f"{live_data[3]:.2f}"]
-            })
+            
+
     # ---- New Section: Additional Financial Indicators ---- #
     st.header("📊 Additional Financial Indicators")
-    
+
     # Function to compute financial indicators
     def compute_technical_indicators(stock_data):
         """Compute technical indicators from stock data."""
         stock_data = stock_data.copy()
-        
+
         # Compute Moving Averages
         stock_data["10-day MA"] = stock_data["Close"].rolling(window=10).mean()
         stock_data["50-day MA"] = stock_data["Close"].rolling(window=50).mean()
-    
+
         # Compute Volatility (10-day standard deviation of % change)
         stock_data["Volatility"] = stock_data["Close"].pct_change().rolling(window=10).std()
-    
+
         # Compute Momentum (Price difference over 10 days)
         stock_data["Momentum"] = stock_data["Close"] - stock_data["Close"].shift(10)
-    
+
         # Compute RSI
         delta = stock_data["Close"].diff()
         gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
         rs = gain / loss
         stock_data["RSI"] = 100 - (100 / (1 + rs))
-    
+
         # Compute Trading Volume (use last available volume)
         stock_data["Trading Volume"] = stock_data["Volume"]
-    
+
         # Drop NaN values from rolling calculations
         stock_data.dropna(inplace=True)
-    
+
         return stock_data
-    
+
     # Predefined tech stock tickers
     tech_stocks = ["AAPL", "AMD", "NVDA", "TSM", "GOOG", "MSFT", "AMZN", "META", "TSLA", "QCOM"]
-    
+
     # ✅ FIX: Add a unique key to prevent duplicate ID errors
-    selected_tickers = st.multiselect("Select tech stocks:", tech_stocks, default=["AAPL", "NVDA", "TSLA"], key="multiselect_tickers")
-    
+    selected_tickers = st.multiselect("Select tech stocks:", tech_stocks, default=["AAPL", "NVDA", "TSLA"], key="multiselect_indicators")
+
     # Fetch and display financial indicators
     if selected_tickers:
         for ticker in selected_tickers:
             stock_data = yf.download(ticker, period="6mo")
-    
+
             # Check if stock data is available
             if stock_data.empty:
                 st.warning(f"No data available for {ticker}. Skipping...")
-                continue  
-    
+                continue
+
             # Compute technical indicators
             stock_data = compute_technical_indicators(stock_data)
-    
+
             # Extract latest values for each indicator
             latest_rsi = stock_data["RSI"].iloc[-1]
             latest_50_ma = stock_data["50-day MA"].iloc[-1]
@@ -183,7 +201,7 @@ if page == "AI Trading Strategy":
             latest_momentum = stock_data["Momentum"].iloc[-1]
             latest_volatility = stock_data["Volatility"].iloc[-1]
             latest_volume = stock_data["Trading Volume"].dropna().iloc[-1] if not stock_data["Trading Volume"].isna().all() else "N/A"
-    
+
             # Create a DataFrame to display the indicators in a table
             df_indicators = pd.DataFrame({
                 "Indicator": ["RSI", "50-day Moving Average", "10-day Moving Average", "Momentum", "Volatility", "Volume"],
@@ -196,11 +214,11 @@ if page == "AI Trading Strategy":
                     f"{int(latest_volume):,}" if latest_volume != "N/A" else "N/A"
                 ]
             })
-    
+
             # Display the table for each stock
             st.subheader(f"{ticker} - Key Indicators")
             st.table(df_indicators)
-elif page == "Stock LSTM Model - Actual vs Predicted":
+elif page == "Stock LSTM Model - Actual vs Predicted Visualizations":
             
     # ----------------- STOCK OPTIONS -----------------
     stock_options = ["AAPL", "AMD", "NVDA", "TSM", "GOOG", "MSFT", "AMZN", "META", "TSLA", "QCOM"]
