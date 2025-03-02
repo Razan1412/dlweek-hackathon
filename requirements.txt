@@ -3,3 +3,10 @@ requests
 joblib
 python-dotenv
 numpy
+pandas
+plotly
+yfinance
+telethon
+tensorflow
+scikit-learn
+matplotlib
