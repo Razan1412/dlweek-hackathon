@@ -107,7 +107,7 @@ if page == "AI Trading Strategy":
         if not model:
             st.error("⚠️ No model loaded. Please check the model selection.")
         else:
-            live_data = fetch_live_stock_data(ticker)
+            live_data = hist_data.copy()
             if not live_data:
                 st.error(f"⚠️ Unable to fetch live data for {ticker}.")
             else:
