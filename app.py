@@ -9,7 +9,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
-from utils.model_utils import get_available_models, load_model, fetch_live_stock_data
+from utils.model_utils import get_available_models, load_model
 
 
 # Set Streamlit page configuration
