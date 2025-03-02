@@ -15,7 +15,7 @@ MODELS_DIR = os.path.join(BASE_DIR, "models")  # ✅ Now correctly points to `mo
 
 def get_available_models():
     """List available models in the models directory."""
-    return [f for f in os.listdir(MODELS_DIR) if f.endswith(".pkl")]
+    return [f for f in os.listdir(MODELS_DIR) if f.endswith(".h5")]
 
 def load_model(model_name):
     """Load the selected model from the models directory."""
