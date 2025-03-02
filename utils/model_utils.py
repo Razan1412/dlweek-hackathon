@@ -4,6 +4,7 @@ import requests
 import random
 import numpy as np
 from dotenv import load_dotenv
+import tensorflow as tf
 
 # ✅ Load API Key from .env
 load_dotenv()
