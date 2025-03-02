@@ -5,6 +5,14 @@ python-dotenv
 numpy
 pandas
 plotly
+<<<<<<< HEAD
 matplotlib
 tensorflow
 scikit-learn
+=======
+yfinance
+telethon
+tensorflow
+scikit-learn
+matplotlib
+>>>>>>> 44ad9b3d794663dd9ad272a6d5a01a8bfb2f8eec
