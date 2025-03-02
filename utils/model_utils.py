@@ -37,7 +37,7 @@ def fetch_live_stock_data(ticker):
         "function": "TIME_SERIES_INTRADAY",
         "symbol": ticker,
         "interval": "5min",
-        "apikey": ALPHA_VANTAGE_API_KEY
+        "apikey": T8ZUIVIO3G0HBGUN
     }
 
     try:
