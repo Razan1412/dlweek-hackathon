@@ -108,23 +108,22 @@ if page == "AI Trading Strategy":
             st.error("⚠️ No model loaded. Please check the model selection.")
         else:
             live_data = hist_data.copy()
-            else:
-                # Perform prediction using the loaded model
-                prediction = model.predict([live_data])
-                predicted_price, action = prediction[0]
+            # Perform prediction using the loaded model
+            prediction = model.predict([live_data])
+            predicted_price, action = prediction[0]
 
-                # Display prediction results
-                st.subheader(f"Stock: {ticker}")
-                st.metric(label="Current Price", value=f"${live_data[0]:.2f}")
-                st.metric(label="Predicted Price", value=f"${predicted_price:.2f}")
-                st.success(f"**Recommendation: {action}**")
+            # Display prediction results
+            st.subheader(f"Stock: {ticker}")
+            st.metric(label="Current Price", value=f"${live_data[0]:.2f}")
+            st.metric(label="Predicted Price", value=f"${predicted_price:.2f}")
+            st.success(f"**Recommendation: {action}**")
 
-                # Display additional stock data in a table
-                st.write("### Stock Data")
-                st.table({
-                    "Metric": ["Current Price", "SMA-50", "SMA-200", "RSI"],
-                    "Value": [f"${live_data[0]:.2f}", f"${live_data[1]:.2f}", f"${live_data[2]:.2f}", f"{live_data[3]:.2f}"]
-                })
+            # Display additional stock data in a table
+            st.write("### Stock Data")
+            st.table({
+                "Metric": ["Current Price", "SMA-50", "SMA-200", "RSI"],
+                "Value": [f"${live_data[0]:.2f}", f"${live_data[1]:.2f}", f"${live_data[2]:.2f}", f"{live_data[3]:.2f}"]
+            })
     # ---- New Section: Additional Financial Indicators ---- #
     st.header("📊 Additional Financial Indicators")
     
