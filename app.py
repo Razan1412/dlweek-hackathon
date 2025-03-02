@@ -108,8 +108,6 @@ if page == "AI Trading Strategy":
             st.error("⚠️ No model loaded. Please check the model selection.")
         else:
             live_data = hist_data.copy()
-            if not live_data:
-                st.error(f"⚠️ Unable to fetch live data for {ticker}.")
             else:
                 # Perform prediction using the loaded model
                 prediction = model.predict([live_data])
