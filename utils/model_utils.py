@@ -5,6 +5,7 @@ import random
 import numpy as np
 from dotenv import load_dotenv
 import tensorflow as tf
+import pandas_ta as ta
 
 # ✅ Load API Key from .env
 load_dotenv()
@@ -31,33 +32,33 @@ def load_model(model_name):
     return None
 
 def fetch_live_stock_data(ticker):
-    """Fetch stock data from Alpha Vantage."""
-    url = "https://www.alphavantage.co/query"
-    params = {
-        "function": "TIME_SERIES_INTRADAY",
-        "symbol": ticker,
-        "interval": "5min",
-        "apikey": T8ZUIVIO3G0HBGUN
-    }
-
+    """Fetch stock data from yfinance and calculate SMA and RSI."""
     try:
-        response = requests.get(url, params=params)
-        data = response.json()
+        stock = yf.Ticker(ticker)
+        # Fetch historical data (adjust period as needed for indicator calculations)
+        hist_data = stock.history(period="6mo") # Fetch 6 months to calculate 50 and 200 day SMAs, and RSI
 
-        if "Time Series (5min)" not in data:
-            print(f"⚠️ Alpha Vantage API error: {data}")
+        if hist_data.empty:
+            print(f"⚠️ Error: No data found for ticker {ticker} from yfinance.", file=sys.stderr) # Print error to stderr
             return None
 
-        latest_timestamp = sorted(data["Time Series (5min)"].keys())[-1]
-        latest_data = data["Time Series (5min)"][latest_timestamp]
+        # Calculate Simple Moving Averages (SMA) using pandas_ta
+        sma_50 = ta.sma(hist_data['Close'], length=50).iloc[-1]  # 50-day SMA, last value
+        sma_200 = ta.sma(hist_data['Close'], length=200).iloc[-1] # 200-day SMA, last value
 
-        close_price = float(latest_data["4. close"])
-        sma_50 = close_price  # Placeholder for now
-        sma_200 = close_price  # Placeholder for now
-        rsi = 50.0  # Placeholder for now
+        # Calculate Relative Strength Index (RSI) using pandas_ta
+        rsi = ta.rsi(hist_data['Close'], length=14).iloc[-1] # 14-day RSI, last value
 
-        return [close_price, sma_50, sma_200, rsi]
+        # Get the latest close and open price (from the most recent day)
+        latest_data = hist_data.iloc[-1]
+        close_price = latest_data['Close']
+        open_price = latest_data['Open']
 
+        return [close_price, sma_50, sma_200, rsi, open_price]
+
+    except Exception as e:
+        print(f"⚠️ Error fetching stock data for {ticker} from yfinance: {e}", file=sys.stderr) # Print error to stderr
+        return None
     except Exception as e:
         print(f"⚠️ Error fetching stock data: {e}")
         return None
