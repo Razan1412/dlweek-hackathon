@@ -19,7 +19,7 @@ st.set_page_config(page_title="Financial & AI Trading Dashboard", layout="wide")
 page = st.sidebar.selectbox("Select Page", ["Financial Dashboard", "Price Predictor Model", "Stock LSTM Model - Actual vs Predicted Visualizations"])
 
 if page == "Financial Dashboard":
-    st.title("Comprehensive Financial Dashboard")
+    st.title("Financial Dashboard")
 
     # Generate dummy data
     dates = pd.date_range(start="2025-03-01", periods=30)
